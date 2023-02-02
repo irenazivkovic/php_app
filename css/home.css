@@ -1,0 +1,110 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body{
+    width: 100%;
+    height: 80vh;
+    background-image:  url(img/home1.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.navbar{
+    width: 85%;
+    margin: auto;
+    padding: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 20px;
+}
+#btn-dodaj{
+    background-color:#006699;
+    color: #fff;
+    border-radius: 20px;
+}
+
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: centeR;
+}
+.pregled-form .form-control{
+    border-radius:1rem;
+}
+.pregled-image{
+    text-align: center;
+}
+.pregled-image img{
+    border-radius: 6rem;
+    width: 11%;
+    margin-top: -3%;
+    transform: rotate(29deg);
+}
+.pregled-form form{
+    padding: 3%;
+}
+.pregled-form form .row{
+    margin-bottom: -7%;
+}
+.pregled-form h3{
+    margin-bottom: 8%;
+    margin-top: -10%;
+    text-align: center;
+    color: #0062cc;
+}
+.pregled-form {
+    width: 80%;
+    border: none;
+    border-radius: 1rem;
+    padding: 1.5%;
+    background: rgba(160, 62, 129, 0);
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+}
+.btnSubmit
+{
+    width: 50%;
+    border-radius: 1rem;
+    padding: 1.5%;
+    color: #fff;
+    background-color: #0062cc;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-content {
+    background-image: url("img/logo2.png");
+}
+
+.panel-info>.panel-heading {
+    color: #31708f;
+    background-color: #d9edf700;
+    border-color: #bce8f100;
+}
+
+h3{
+    color: #006699;
+}
+
+
+p{
+    color: #006699;
+}
+.btnimage{
+    width: 25px;
+    height: 25px;
+}
+.container{
+    border-radius:20px;
+}
