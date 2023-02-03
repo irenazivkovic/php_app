@@ -10,7 +10,8 @@ function prikazi() {
 
 
 $('#btn-izbrisi').click( function(){
-  const checked = $('button[id=btn-izmeni]:selected');
+  const checked = $('input[name="checked-donut"]:checked');
+  
   request = $.ajax({
     url:'crud/delete.php',
     type: 'post',
@@ -18,87 +19,17 @@ $('#btn-izbrisi').click( function(){
   });
   request.done(function (response, textStatus, jqXHR) {
     if (response === 'Success') {
-      checked.closest("tr").remove();
-        console.log('Pregled je obrisan ');
-        alert('Pregled je obrisan');
-        //$('#izmeniForm').reset;
+      $('div#container').children(`#${checked.val()}`).remove();
+      console.log('Pregled je obrisan ');
+      alert('Pregled je obrisan');
+
     }
     else {
       console.log('Pregled nije obrisan ' + response);
       alert('Pregled nije obrisan');
     }
 });
-});
 
-$('#btn-izmeni').click(function () {
-
-  const checked = $('input[name=checked-donut]:checked');
-
-  request = $.ajax({
-      url: 'crud/get.php',
-      type: 'post',
-      data: {'id': checked.val()},
-      dataType: 'json'
-  });
-
-  request.done(function (response, textStatus, jqXHR) {
-      console.log('Popunjena');
-      $('#idzubar').val(response[0]['zubar']);
-      console.log(response[0]['zubar']);
-
-      $('#idgrad').val(response[0]['grad'].trim());
-      console.log(response[0]['grad'].trim());
-
-      $('#idkategorija').val(response[0]['kategorija'].trim());
-      console.log(response[0]['kategorija'].trim());
-
-      $('#iddatum').val(response[0]['datum'].trim());
-      console.log(response[0]['datum'].trim());
-
-      $('#idid').val(checked.val());
-
-      console.log(response);
-  });
-
-  request.fail(function (jqXHR, textStatus, errorThrown) {
-      console.error('The following error occurred: ' + textStatus, errorThrown);
-  });
-
-});
-
-$('#izmeniForm').submit(function () {
-  event.preventDefault();
-  console.log("Izmena");
-  const $form = $(this);
-  const $inputs = $form.find('input, select, button');
-  const serializedData = $form.serialize();
-  console.log(serializedData);
-  $inputs.prop('disabled', true);
-
-  request = $.ajax({
-      url: 'crud/update.php',
-      type: 'post',
-      data: serializedData
-  });
-
-  request.done(function (response, textStatus, jqXHR) {
-
-
-      if (response === 'Success') {
-          console.log('Pregled je izmenjen');
-          location.reload(true);
-          //$('#izmeniForm').reset;
-      }
-      else console.log('Pregled nije izmenjen ' + response);
-      console.log(response);
-  });
-
-  request.fail(function (jqXHR, textStatus, errorThrown) {
-      console.error('The following error occurred: ' + textStatus, errorThrown);
-  });
-
-
-  
 });
  
 $('#btnDodaj').submit(function(){
@@ -106,36 +37,61 @@ $('#btnDodaj').submit(function(){
     return false;
 });
 
-$('#btn-izmeni').submit(function () {
-   
-    $('#myModal').modal('toggle');
-    return false;
-});
-
-$('#dodajForm').submit(function () {
+$('#dodajForm').submit(function (event) {
     event.preventDefault();
   
-    const $form = $(this);
-    const $inputs = $form.find('input, select, button');
-    const serializedData = $form.serialize();
-    console.log(serializedData);
-    let obj = $form.serializeArray().reduce(function (json, { name, value }) {
-    json[name] = value;
-    return json;
-    }, {});
-    console.log(obj);
-    $inputs.prop("disabled", true);
-
+    const $zubar = $('input[name="zubar"]').val();
+    const $grad = $('input[name="grad"]').val();
+    const $kategorija = $('input[name="kategorija"]').val();
+    const $datum = $('input[name="datum"]').val();
+    
     request = $.ajax({
         url: 'crud/add.php',
         type: 'post',
-        data: serializedData
+        data: {
+          'zubar': $zubar,
+          'grad': $grad,
+          'kategorija': $kategorija,
+          'datum': $datum,
+          'user_id': localStorage.getItem('UserID')
+        }
     });
 
     request.done(function (response, textStatus, jqXHR) {
         if (response === 'Success') {
             alert('Pregled je dodat');
-            appandRow(obj);
+            $.get("crud/getLastElement.php", function (data){
+              
+              const split = data.split('"');
+              data = [];
+              split.forEach((element) => {
+                  if(element != '[' && element != ',' && element != ']'){
+                      data.push(element);
+                  };
+              });
+
+              $('#container').append(`
+                <div class="card text-white bg-info mb-6" id=${data[0]} style="width:15%; position: static; border-radius: 20px; text-align: center; margin: 30px 30px;">       
+                  <div class="card-header">
+                    <h3><b>Zakazan pregled</b></h3>
+                  </div>
+                  <div class="card-body">
+                    <ul style="list-style: none;">
+                      <li>Zubar: ${data[1]}</li>
+                      <li>Grad: ${data[2]}</li>
+                      <li>Kategorija: ${data[3]}</li>
+                      <li>Datum: ${data[4]}</li>
+                      <li>
+                        <label class="radio-btn">
+                          <input type="radio" name="checked-donut" value=${data[0]}>
+                          <span class="checkmark"></span>
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              `);
+            });
         }
         else console.log('Pregled nije dodat ' + response);
         console.log(response);
@@ -146,27 +102,3 @@ $('#dodajForm').submit(function () {
     });
 });
 
-
-function appandRow(obj) {
-  console.log(obj);
-
-  $.get("crud/getLastElement.php", function (data) {
-    console.log(data);
-    console.log($("#tabela tbody tr:last").get());
-    $("#tabela tbody").append(`
-      <tr>
-          <td>${data}</td>
-          <td>${obj.zubar}</td>
-          <td>${obj.grad}</td>
-          <td>${obj.kategorija}</td>
-          <td>${obj.datum}</td>
-          <td>
-              <label class="custom-radio-btn">
-                  <input type="radio" name="checked-donut" value=${data}>
-                  <span class="checkmark"></span>
-              </label>
-          </td>
-      </tr>
-    `);
-  });
-}

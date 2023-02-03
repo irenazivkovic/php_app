@@ -9,19 +9,20 @@ if(isset($_POST['username']) && isset($_POST['password'])){
     $uname = $_POST['username'];
     $upass = $_POST['password'];
 
+
     //kreiramo korisnika
     $korisnik = new User(1,$uname,$upass);
    // $odg = $korisnik->logInUser($uname,$upass, mysqli);
    $odg = User::logInUser($korisnik, $conn); //staticki pristup preko klase
 
    if($odg->num_rows==1){
-    echo `
-    <script>
-    console.log("Uspesno ste se prijavili");
-    </script>`;
-    $_SESSION['user_id'] = $korisnik->id;
-    header('Location: home.php');
-    exit();
+        $row = $odg->fetch_row();
+        $user_id = $row[0];
+
+        $_SESSION['user_id'] = $user_id;
+    
+        header('Location: home.php');
+        exit();
    }
    else{
     echo `

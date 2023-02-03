@@ -2,13 +2,15 @@
 
 require "dbBroker.php";
 require "model/pregled.php";
+
 session_start();
+
 if (!($_SESSION['user_id'])) {
     header("Location: index.php");
     die();
 }
 
-$result = Pregled::getAll($conn);
+$result = Pregled::getAll($_SESSION['user_id'], $conn);
 if (!$result) {
     echo "Greska kod upita<br>";
     die();
@@ -33,16 +35,13 @@ else {
 
     <body>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
+        <script>localStorage.setItem('UserID', <?php echo $_SESSION['user_id']?>)</script>
     
         <div class="navbar" >
         <img src="css/img/logo.png" style="width: 120px; cursor: pointer;">
             <ul>
                 <li>
-                <input type="text" id="myInput" class="btn" placeholder="Pretrazite pregled..." onkeyup="pretrazi()" style="width: 500px;">
-                </li>
-                <li>
-                <button id="btn-izmeni" class="btn" onclick="sortTable()"><img src="css/img/sort.png" style="width: 25px;height: 25px;"></button>
+                <input type="text" id="search-input" class="btn" placeholder="Pretrazite pregled po kategoriji..." onkeyup="pretrazi()" style="width: 500px;">
                 </li>
                 <li>
                 <button id="btn-dodaj" class="btn" data-toggle="modal" data-target="#myModal">Zakaži pregled</button>
@@ -51,43 +50,43 @@ else {
             </ul>
         </div>
 
-        <div class="container">
-        <?php
-             while ($red = $result->fetch_array()) {
-                 ?>
-        <div class="card text-white bg-info mb-6" id="tabela" style="width:15%; position: static; border-radius: 20px; text-align: center; margin: 30px 30px;">       
-        <div class="card-header"><h3><b>Zakazan pregled<b></h3></div>
+        <div class="container" id="container">
+            <?php
+                while ($red = $result->fetch_array()) {
+                    ?>
+            <div class="card text-white bg-info mb-6 pregled" id=<?php echo $red['id'] ?> style="width:15%; position: static; border-radius: 20px; text-align: center; margin: 30px 30px;">       
+                <div class="card-header"><h3><b>Zakazan pregled</b></h3></div>
                 <div class="card-body">
-                            <ul style="list-style: none;">
-                                <li>Zubar: <?php echo $red["zubar"] ?></li>
-                                <li>Grad: <?php echo $red["grad"] ?></li>
-                                <li>Kategorija: <?php echo $red["kategorija"] ?></li>
-                                <li>Datum: <?php echo $red["datum"] ?></li>
-                                <li>
-                                    <label class="radio-btn">
-                                        <input type="radio" name="checked-donut" value=<?php echo $red["id"] ?>>
-                                        <span class="checkmark"></span>
-                                    </label>
-                                </li>
-                            </ul>
-                  </div>
-             <br>
-        </div>
-        <br>
+                    <ul style="list-style: none;">
+                        <li>Zubar: <?php echo $red["zubar"] ?></li>
+                        <li>Grad: <?php echo $red["grad"] ?></li>
+                        <li class="category">Kategorija: <?php echo $red["kategorija"] ?></li>
+                        <li>Datum: <?php echo $red["datum"] ?></li>
+                        <li>
+                            <label class="radio-btn">
+                                <input type="radio" name="checked-donut" value=<?php echo $red["id"]?>>
+                                <span class="checkmark"></span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         <?php
-           }  
-         }
+            }  
+        }
         ?>
         </div>
-        <button id="btn-izmeni" class="btn" data-toggle="modal" data-target="#izmeniModal" style="width: 150px;padding: 15px 0; text-align: center; margin: 20px 10px;border-radius: 20px;background-color:#337ab7; color:#fff;">Izmeni pregled</button>
-        <button id="btn-izbrisi" class="btn" style="width: 150px;padding: 15px 0; text-align: center; margin: 20px 10px;border-radius: 20px; background-color:#337ab7; color:#fff;">Obrisi pregled</button>
-        <a class="btn btn-primary" href="logout.php" role="button" style="width: 150px;padding: 15px 0; text-align: center; margin: 20px 10px;border-radius: 20px;">Kraj rada</a>
 
+        <div class="opcije">
+            <button id="btn-izbrisi" class="btn" style="width: 150px;padding: 15px 0; text-align: center; margin: 20px 10px;border-radius: 20px; background-color:#337ab7; color:#fff;">Obrisi pregled</button>
+            <a class="btn btn-primary" href="logout.php" role="button" style="width: 150px;padding: 15px 0; text-align: center; margin: 20px 10px;border-radius: 20px;">Kraj rada</a>
+        </div>
+        
         <div class="modal fade" id="myModal" role="dialog">
             <div class="modal-dialog">
 
                 <!--Modalna forma za dodavanje-->
-                <div class="modal-content" style="border: 4px solid #006699;">
+                <div class="modal-content" style="border: 4px solid #006699; background-size: cover; background-position: center;">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
@@ -98,16 +97,16 @@ else {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" style="border: 1px solid #006699" name="zubar" class="form-control" placeholder="Zubar *" value="" />
+                                            <input type="text" style="width: 400px;border: 1px solid #006699" name="zubar" class="form-control" placeholder="Zubar *" value="" />
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" style="border: 1px solid #006699" name="grad" class="form-control" placeholder="Grad  *" value="" />
+                                            <input type="text" style="width: 400px;border: 1px solid #006699" name="grad" class="form-control" placeholder="Grad  *" value="" />
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" style="border: 1px solid #006699" name="kategorija" class="form-control" placeholder="Kategorija *" value="" />
+                                            <input type="text" style="width: 400px;border: 1px solid #006699" name="kategorija" class="form-control" placeholder="Kategorija *" value="" />
                                         </div>
                                         <div class="form-group">
-                                            <input type="date" style="border: 1px solid #006699" name="datum" class="form-control" placeholder="Kategorija *" value="" />
+                                            <input type="date" style="width: 400px;border: 1px solid #006699" name="datum" class="form-control" placeholder="Kategorija *" value="" />
                                         </div>
                                         <div class="form-group">
                                             <button id="btnDodaj" type="submit" class="btn btn-success btn-block" style="background-color:  #006699; border: 1px solid white;"><i class="glyphicon glyphicon-plus"></i> Dodaj pregled
@@ -129,58 +128,6 @@ else {
             </div>
         </div>
 
-
-        <div class="modal fade" id="izmeniModal" role="dialog">
-            <div class="modal-dialog">
-
-                <!-- Modalna forma za izmenu izabranog pregleda-->
-                <div id="myModal" class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container pregled-form">
-                            <form action="#" method="post" id="izmeniForm">
-                                <h3 style="color: #006699">Izmena pregled</h3>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        
-                                        <div class="form-group">
-                                            <input id="idid" type="text" name="id" class="form-control" placeholder="Id pregleda *" value="" readonly />
-                                        </div>
-                                        <div class="form-group">
-                                            <input id="idzubar" type="text" name="zubar" class="form-control" placeholder="Zubar *" value="" />
-                                        </div>
-                                        <div class="form-group">
-                                            <input id="idgrad" type="text" name="grad" class="form-control" placeholder="Grad u kom se nalazi *" value="" />
-                                        </div>
-                                        <div class="form-group">
-                                            <input id="idkategorija" type="text" name="kategorija" class="form-control" placeholder="Kategorija *" value="" />
-                                        </div>
-                                        <div class="form-group">
-                                            <input id="iddatum" type="date" name="datum" class="form-control" placeholder="Datum *" value="" />
-                                        </div>
-                                        <div class="form-group">
-                                            <button id="btnIzmeni" type="submit" class="btn btn-success btn-block" style="color: white; background-color: #006699; border: 1px solid white"><i class="glyphicon glyphicon-pencil"></i> Izmeni pregled
-                                            </button>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Zatvori</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    
-
-
         <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
         <script src="js/main.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -188,17 +135,33 @@ else {
         <script>
         function pretrazi() {
 
-            var input, filter, table, tr, i, td1, td2, td3, td4, txtValue1, txtValue2, txtValue3, txtValue4;
-            input = document.getElementById("myInput");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("tabela");
-            tr = table.getElementsByTagName("tr");
+            const input = document.getElementById("search-input");
+            const filter = input.value.toUpperCase();
 
+            let toHidden = [];
+
+            $('.category').each((index, element) => {
+                const pattern = new RegExp(`^${filter}.*`);
+                const kategorija = (element.innerHTML.split(': ')[1]).toUpperCase();
+                
+                if(filter === '') {
+                    toHidden.push(false);
+                }else {
+                    toHidden.push(!pattern.test(kategorija));
+                }
+                
+            });
+
+            $('.pregled').each((index, element) => {
+                element.hidden = toHidden[index];
+            });
+
+            /*
             for (i = 0; i < tr.length; i++) {
-                td1 = tr[i].getElementsByTagName("td")[1];
-                td2 = tr[i].getElementsByTagName("td")[2];
-                td3 = tr[i].getElementsByTagName("td")[3];
-                td4 = tr[i].getElementsByTagName("td")[4];
+                td1 = tr[i].getElementsByTagName("li")[1];
+                td2 = tr[i].getElementsByTagName("li")[2];
+                td3 = tr[i].getElementsByTagName("li")[3];
+                td4 = tr[i].getElementsByTagName("li")[4];
 
                 if (td1 || td2 || td3 || td4) {
                     txtValue1 = td1.textContent || td1.innerText;
@@ -214,30 +177,9 @@ else {
                     }
                 }
             }
+            */
         }
 
-        function sortTable() {
-            var table, rows, switching, i, x, y, shouldSwitch;
-            table = document.getElementById("tabela");
-            switching = true;
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[1];
-                    y = rows[i + 1].getElementsByTagName("TD")[1];
-                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                }
-            }
-        }
     </script>
     </body>
 
