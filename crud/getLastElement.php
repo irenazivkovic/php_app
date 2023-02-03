@@ -5,7 +5,7 @@ require "../model/pregled.php";
 
 $status = Pregled::getLast($conn);
 if ($status) {
-    echo $status->fetch_column();
+    echo json_encode($status->fetch_row());
 } else {
     echo $status;
     echo 'Failed';

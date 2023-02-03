@@ -1,11 +1,13 @@
 <?php 
 
+
 class Pregled{
     public $id;
     public $zubar;
     public $grad;
     public $kategorija;
     public $datum;
+    public $user_id;
 
     public function __construct($id=null, $zubar=null, $grad=null, $kategorija=null, $datum=null){
         $this->id=$id;
@@ -15,8 +17,8 @@ class Pregled{
         $this->datum=$datum;
     }
 
-    public static function getAll(mysqli $conn){
-        $query = "SELECT * FROM pregled";
+    public static function getAll($user_id, mysqli $conn){
+        $query = "SELECT * FROM pregled WHERE user_id=$user_id";
         return $conn->query($query);
     }
 
@@ -38,13 +40,8 @@ class Pregled{
         return $conn->query($query);
     }
 
-    public static function add( $zubar,$grad, $kategorija, $datum, mysqli $conn){
-        $query = "INSERT INTO pregled(zubar,grad,kategorija,datum) VALUES('$zubar','$grad', '$kategorija', '$datum')";
-        return $conn->query($query);
-    }
-
-    public static function update($id, $zubar,$grad, $kategorija, $datum, mysqli $conn){
-        $query = "UPDATE pregled SET zubar='$zubar', grad='$grad', kategorija='$kategorija', datum='$datum'WHERE id=$id";
+    public static function add($zubar, $grad, $kategorija, $datum, $user_id, mysqli $conn){
+        $query = "INSERT INTO pregled(zubar, grad, kategorija, datum, user_id) VALUES('$zubar','$grad', '$kategorija', '$datum', $user_id)";
         return $conn->query($query);
     }
 
